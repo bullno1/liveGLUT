@@ -11,16 +11,11 @@
 
 #include <cstdlib>
 
-int main(int, char**);
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern __declspec(dllexport) int start()
-{
-	return main(__argc, __argv);
-}
+extern __declspec(dllexport) int main(int argc, char* argv[]);
 
 #ifdef __cplusplus
 }

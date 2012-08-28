@@ -18,7 +18,7 @@ namespace fs = boost::filesystem;
 #define STAGE_SCRIPT "stage.sh"
 #endif
 
-typedef int(*StartFunc)();
+typedef int(*StartFunc)(int argc, char* argv[]);
 
 namespace
 {
@@ -27,6 +27,8 @@ void* module = 0;
 std::string compileCmd;
 std::string stageCmd;
 std::string libraryPath;
+int argc;
+char** argv;
 
 }
 
@@ -75,7 +77,7 @@ void liveGlutReload()
 		std::cout << "Reloading module" << std::endl;
 		glLoadIdentity();
 		StartFunc start = load();
-		start();
+		start(argc, argv);
 		glutPostRedisplay();
 	}
 	else
@@ -92,7 +94,7 @@ void liveGlutMainLoop()
 	stage();
 	StartFunc start = load();
 	if(start)
-		start();
+		start(argc, argv);
 }
 
 std::string quote(std::string str)
@@ -100,8 +102,11 @@ std::string quote(std::string str)
 	return "\"" + str + "\"";
 }
 
-void liveGlutInit(int argc, char* argv[])
+void liveGlutInit(int argc_, char* argv_[])
 {
+	argc = argc_;
+	argv = argv_;
+
 	fs::path pathToProgram = fs::system_complete(argv[0]);
 	fs::path programFolder = pathToProgram.parent_path();
 	compileCmd = quote((programFolder / COMPILE_SCRIPT).string()) + " " + quote(programFolder.string());
