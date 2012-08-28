@@ -6,8 +6,6 @@
 #include "utils.h"
 #include "dynLib.h"
 
-#include <dlfcn.h>
-
 namespace fs = boost::filesystem;
 
 #ifdef WIN32
@@ -60,7 +58,7 @@ StartFunc load()
 	}
 	else
 	{
-		std::cout <<"Failed to load: " << dlerror() << std::endl;
+		std::cout <<"Failed to load: " << std::endl;
 		return NULL;
 	}
 }
