@@ -10,8 +10,7 @@ solution "liveGLUT"
 			"src/*.cpp",
 			"src/FileWatcher/FileWatcher.h",
 			"src/FileWatcher/FileWatcher.cpp",
-			"src/FileWatcher/FileWatcherImpl.h",
-			"src/FileWatcher/FileWatcherImpl.cpp"
+			"src/FileWatcher/FileWatcherImpl.h"
 		}
 		includedirs {
 			"src"
@@ -26,6 +25,32 @@ solution "liveGLUT"
 			files {
 				"src/win/dynLib.cpp",
 				"src/FileWatcher/FileWatcherWin32.cpp"
+			}
+			prebuildcommands {
+				"copy /Y ..\\src\\hook.h ..\\bin\\win > NUL"
+			}
+
+		configuration "linux"
+			targetdir "bin/linux"
+			defines {
+				"LINUX"
+			}
+			files {
+				"src/linux/dynLib.cpp",
+				"src/FileWatcher/FileWatcherLinux.cpp"
+			}
+			links {
+				"dl",
+				"GL",
+				"glut",
+				"boost_filesystem",
+				"boost_system"
+			}
+			linkoptions{
+				"-rdynamic"
+			}
+			prebuildcommands {
+				"cp ../src/hook.h ../bin/linux"
 			}
 
 		configuration "Develop"

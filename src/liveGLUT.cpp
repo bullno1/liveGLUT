@@ -1,14 +1,24 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
-#include <glut.h>
 #include <boost/filesystem.hpp>
+#include "platformGlut.h"
 #include "utils.h"
 #include "dynLib.h"
 
 namespace fs = boost::filesystem;
 
-typedef int(*StartFunc)();
+#ifdef WIN32
+#define COMPILE_SCRIPT "compile.bat"
+#define STAGE_SCRIPT "stage.bat"
+#endif
+
+#ifdef __linux__
+#define COMPILE_SCRIPT "compile.sh"
+#define STAGE_SCRIPT "stage.sh"
+#endif
+
+typedef int(*StartFunc)(int argc, char* argv[]);
 
 namespace
 {
@@ -17,6 +27,8 @@ void* module = 0;
 std::string compileCmd;
 std::string stageCmd;
 std::string libraryPath;
+int argc;
+char** argv;
 
 }
 
@@ -44,7 +56,7 @@ StartFunc load()
 	module = dynLibLoad(libraryPath.c_str());
 	if(module)
 	{
-		return dynLibGet<StartFunc>(module, "start");
+		return dynLibGet<StartFunc>(module, "main");
 	}
 	else
 	{
@@ -65,7 +77,7 @@ void liveGlutReload()
 		std::cout << "Reloading module" << std::endl;
 		glLoadIdentity();
 		StartFunc start = load();
-		start();
+		start(argc, argv);
 		glutPostRedisplay();
 	}
 	else
@@ -82,14 +94,26 @@ void liveGlutMainLoop()
 	stage();
 	StartFunc start = load();
 	if(start)
-		start();
+		start(argc, argv);
 }
 
-void liveGlutInit(int argc, char* argv[])
+std::string quote(std::string str)
 {
+	return "\"" + str + "\"";
+}
+
+void liveGlutInit(int argc_, char* argv_[])
+{
+	argc = argc_;
+	argv = argv_;
+
 	fs::path pathToProgram = fs::system_complete(argv[0]);
 	fs::path programFolder = pathToProgram.parent_path();
-	compileCmd = "\"\"" + (programFolder / "compile.bat").string() + "\" \"" + programFolder.string() + "\"\"";
-	stageCmd = "\"\"" + (programFolder / "stage.bat").string() + "\"\"";
+	compileCmd = quote((programFolder / COMPILE_SCRIPT).string()) + " " + quote(programFolder.string());
+	stageCmd = quote((programFolder / STAGE_SCRIPT).string());
+#ifdef WIN32
+	compileCmd = quote(compileCmd);
+	stageCmd = quote(stageCmd);
+#endif
 	libraryPath = (fs::current_path() / "tmp" / "main.bin").string();
 }

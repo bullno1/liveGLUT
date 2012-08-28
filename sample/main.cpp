@@ -1,6 +1,5 @@
 #include <cmath>
 #include <glut.h>
-#include <iostream>
 
 void render();
 void update(int);

@@ -1,7 +1,7 @@
 #include <cstdlib>
-#include <glut.h>
 #include <iostream>
 #include <FileWatcher/FileWatcher.h>
+#include "platformGlut.h"
 #include "liveGLUT.h"
 #include "utils.h"
 
@@ -40,7 +40,17 @@ void update(int)
 	}
 }
 
+#ifdef WIN32
 #define HOOKAPI(TYPE) extern __declspec(dllexport) TYPE __stdcall
+#else
+#define HOOKAPI(TYPE) extern TYPE
+#endif
+
+#ifdef WIN32
+typedef void (__cdecl *ExitFunc)(int);
+#else
+typedef void (*ExitFunc)(int);
+#endif
 
 bool inited = false;
 
@@ -78,7 +88,8 @@ HOOKAPI(void) hook_glutPostRedisplay()
 		glutPostRedisplay();
 }
 
-HOOKAPI(int) hook_glutCreateWindowWithExit(const char* title, void (__cdecl *exitfunc)(int))
+
+HOOKAPI(int) hook_glutCreateWindowWithExit(const char* title, ExitFunc)
 {
 	return hook_glutCreateWindow(title);
 }
@@ -96,7 +107,7 @@ HOOKAPI(void) hook_glutInit(int *argcp, char **argv)
 	glutInit(argcp, argv);
 }
 
-HOOKAPI(void) hook_glutInitWithExit(int *argcp, char **argv, void (__cdecl *exitfunc)(int))
+HOOKAPI(void) hook_glutInitWithExit(int *argcp, char **argv, ExitFunc)
 {
 	hook_glutInit(argcp, argv);
 }
