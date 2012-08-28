@@ -26,6 +26,9 @@ solution "liveGLUT"
 				"src/win/dynLib.cpp",
 				"src/FileWatcher/FileWatcherWin32.cpp"
 			}
+			prebuildcommands {
+				"copy /Y ..\\src\\hook.h ..\\bin\\win > NUL"
+			}
 
 		configuration "linux"
 			targetdir "bin/linux"
@@ -45,6 +48,9 @@ solution "liveGLUT"
 			}
 			linkoptions{
 				"-rdynamic"
+			}
+			prebuildcommands {
+				"cp ../src/hook.h ../bin/linux"
 			}
 
 		configuration "Develop"
